@@ -6,40 +6,42 @@ import (
 )
 
 var storage = make(map[string]string)
-var https = "https://"
-var id = "EwHXdJfB"
-var errorMessage = "Sorry, error..."
 
-func MainHandler(w http.ResponseWriter, r *http.Request) {
-	switch r.Method {
+func PostHandler(w http.ResponseWriter, r *http.Request) {
 
-	case http.MethodPost:
-		body, err := io.ReadAll(r.Body)
+	if r.Method == http.MethodPost {
+		bodyBytes, err := io.ReadAll(r.Body)
 
 		if err != nil {
-			http.Error(w, errorMessage, http.StatusInternalServerError) //500
+			http.Error(w, "Error", http.StatusInternalServerError)
 			return
 		}
 
-		originalURL := string(body)
+		originalURL := string(bodyBytes)
+		id := "EwHXdJfB"
 		storage[id] = originalURL
 
 		w.WriteHeader(201)
-		w.Write([]byte(https + r.Host + "/" + id))
+		w.Write([]byte("https://" + r.Host + "/" + id))
+	} else {
+		http.Error(w, "Error", http.StatusMethodNotAllowed)
+	}
+}
 
-	case http.MethodGet:
+func GetHandler(w http.ResponseWriter, r *http.Request) {
+
+	if r.Method == http.MethodGet {
 		currId := r.URL.Path
 		currIdWithoutSlash := currId[1:]
-
 		value, ok := storage[currIdWithoutSlash]
 
-		if ok {
-			http.Redirect(w, r, value, http.StatusTemporaryRedirect) //307
+		if ok == true {
+			http.Redirect(w, r, value, 307)
 		} else {
-			http.Error(w, errorMessage, http.StatusBadRequest) //400
+			http.Error(w, "Error", http.StatusBadRequest)
 		}
 
-	default:
-		http.Error(w, errorMessage, http.StatusMethodNotAllowed) //405
+	} else {
+		http.Error(w, "Error", http.StatusBadRequest)
 	}
 }

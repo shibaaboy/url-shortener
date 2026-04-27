@@ -4,20 +4,31 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"testing"
+
+	"github.com/go-chi/chi/v5"
 )
 
-func TestGetHandler(t *testing.T) {
-	storage = make(map[string]string)
-	storage["abc"] = "https://example.com"
+func TestGetHandler_OK(t *testing.T) {
+	// подменяем storage
+	storage = map[string]string{
+		"abc": "https://example.com",
+	}
+
+	r := chi.NewRouter()
+	r.Get("/{id}", GetHandler)
 
 	req := httptest.NewRequest(http.MethodGet, "/abc", nil)
 	w := httptest.NewRecorder()
 
-	GetHandler(w, req)
+	r.ServeHTTP(w, req)
 
-	resp := w.Result()
+	res := w.Result()
 
-	if resp.StatusCode != http.StatusTemporaryRedirect {
-		t.Errorf("expected 307, got %d", resp.StatusCode)
+	if res.StatusCode != http.StatusTemporaryRedirect {
+		t.Errorf("expected 307, got %d", res.StatusCode)
+	}
+
+	if res.Header.Get("Location") != "https://example.com" {
+		t.Errorf("wrong redirect location")
 	}
 }

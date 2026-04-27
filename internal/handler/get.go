@@ -12,7 +12,7 @@ func GetHandler(w http.ResponseWriter, r *http.Request) {
 	value, ok := storage[id]
 
 	if ok {
-		http.Redirect(w, r, value, 307)
+		http.Redirect(w, r, value, http.StatusTemporaryRedirect)
 	} else {
 		http.Error(w, "Error", http.StatusBadRequest)
 	}

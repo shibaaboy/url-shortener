@@ -8,7 +8,7 @@ import (
 	"github.com/go-chi/chi/v5"
 )
 
-func TestGetHandler_OK(t *testing.T) {
+func TestGetHandler(t *testing.T) {
 	// подменяем storage
 	storage = map[string]string{
 		"abc": "https://example.com",

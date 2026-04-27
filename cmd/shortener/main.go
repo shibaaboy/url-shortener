@@ -3,15 +3,17 @@ package main
 import (
 	"net/http"
 
+	"github.com/go-chi/chi/v5"
 	"github.com/shibaaboy/url-shortener/internal/handler"
 )
 
 func main() {
-	mux := http.NewServeMux()
-	mux.HandleFunc("/", handler.PostHandler)
-	mux.HandleFunc("/{id}", handler.GetHandler)
+	r := chi.NewRouter()
 
-	err := http.ListenAndServe(":8080", mux)
+	r.Post("/", handler.PostHandler)
+	r.Get("/{id}", handler.GetHandler)
+
+	err := http.ListenAndServe(":8080", r)
 	if err != nil {
 		panic(err)
 	}

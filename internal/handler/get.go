@@ -1,20 +1,18 @@
 package handler
 
-import "net/http"
+import (
+	"net/http"
+
+	"github.com/go-chi/chi/v5"
+)
 
 func GetHandler(w http.ResponseWriter, r *http.Request) {
 
-	if r.Method == http.MethodGet {
-		currId := r.URL.Path
-		currIdWithoutSlash := currId[1:]
-		value, ok := storage[currIdWithoutSlash]
+	id := chi.URLParam(r, "id")
+	value, ok := storage[id]
 
-		if ok == true {
-			http.Redirect(w, r, value, 307)
-		} else {
-			http.Error(w, "Error", http.StatusBadRequest)
-		}
-
+	if ok {
+		http.Redirect(w, r, value, 307)
 	} else {
 		http.Error(w, "Error", http.StatusBadRequest)
 	}

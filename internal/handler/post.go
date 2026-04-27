@@ -6,22 +6,18 @@ import (
 )
 
 func PostHandler(w http.ResponseWriter, r *http.Request) {
+	defer r.Body.Close()
+	bodyBytes, err := io.ReadAll(r.Body)
 
-	if r.Method == http.MethodPost {
-		bodyBytes, err := io.ReadAll(r.Body)
-
-		if err != nil {
-			http.Error(w, "Error", http.StatusInternalServerError)
-			return
-		}
-
-		originalURL := string(bodyBytes)
-		id := "EwHXdJfB"
-		storage[id] = originalURL
-
-		w.WriteHeader(201)
-		w.Write([]byte("https://" + r.Host + "/" + id))
-	} else {
-		http.Error(w, "Error", http.StatusMethodNotAllowed)
+	if err != nil {
+		http.Error(w, "Error", http.StatusInternalServerError)
+		return
 	}
+
+	originalURL := string(bodyBytes)
+	id := "EwHXdJfB"
+	storage[id] = originalURL
+
+	w.WriteHeader(http.StatusCreated)
+	w.Write([]byte("https://" + r.Host + "/" + id))
 }

@@ -3,6 +3,8 @@ package handler
 import (
 	"io"
 	"net/http"
+
+	"github.com/shibaaboy/url-shortener/internal/config"
 )
 
 func PostHandler(w http.ResponseWriter, r *http.Request) {
@@ -19,5 +21,5 @@ func PostHandler(w http.ResponseWriter, r *http.Request) {
 	storage[id] = originalURL
 
 	w.WriteHeader(http.StatusCreated)
-	w.Write([]byte("https://" + r.Host + "/" + id))
+	w.Write([]byte(config.BaseURL() + r.Host + "/" + id))
 }

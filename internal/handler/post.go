@@ -9,13 +9,13 @@ import (
 	"github.com/shibaaboy/url-shortener/internal/config"
 )
 
-func PostHandler(w http.ResponseWriter, r *http.Request) {
+func (h *Handler) PostHandler(w http.ResponseWriter, r *http.Request) {
 	r.Body = http.MaxBytesReader(w, r.Body, 2048)
 	defer r.Body.Close()
 
 	bodyBytes, err := io.ReadAll(r.Body)
 	if err != nil {
-		http.Error(w, "request too large", http.StatusRequestEntityTooLarge)
+		http.Error(w, "Error. Request too large", http.StatusBadRequest)
 		return
 	}
 
@@ -25,7 +25,7 @@ func PostHandler(w http.ResponseWriter, r *http.Request) {
 	_, _ = rand.Read(b)
 	id := base64.URLEncoding.EncodeToString(b)
 
-	storage[id] = originalURL
+	h.store.Set(id, originalURL)
 
 	w.WriteHeader(http.StatusCreated)
 

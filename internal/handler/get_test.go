@@ -6,16 +6,18 @@ import (
 	"testing"
 
 	"github.com/go-chi/chi/v5"
+	"github.com/shibaaboy/url-shortener/internal/storage"
 )
 
 func TestGetHandler(t *testing.T) {
-	// подменяем storage
-	storage = map[string]string{
-		"abc": "https://example.com",
-	}
+	store := storage.NewStorage()
+
+	store.Set("abc", "https://example.com")
+
+	h := NewHandler(store)
 
 	r := chi.NewRouter()
-	r.Get("/{id}", GetHandler)
+	r.Get("/{id}", h.GetHandler)
 
 	req := httptest.NewRequest(http.MethodGet, "/abc", nil)
 	w := httptest.NewRecorder()

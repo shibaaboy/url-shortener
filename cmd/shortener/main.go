@@ -46,8 +46,12 @@ func newApp() *http.Server {
 	r := initRouter(h)
 
 	return &http.Server{
-		Addr:    config.Addr(),
-		Handler: r,
+		Addr:              config.Addr(),
+		Handler:           r,
+		ReadTimeout:       5 * time.Second,
+		ReadHeaderTimeout: 3 * time.Second,
+		WriteTimeout:      10 * time.Second,
+		IdleTimeout:       30 * time.Second,
 	}
 }
 

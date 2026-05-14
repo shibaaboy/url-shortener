@@ -13,6 +13,7 @@ import (
 	"github.com/go-chi/chi/v5"
 	"github.com/shibaaboy/url-shortener/internal/config"
 	"github.com/shibaaboy/url-shortener/internal/handler"
+	"github.com/shibaaboy/url-shortener/internal/logger"
 	"github.com/shibaaboy/url-shortener/internal/storage"
 )
 
@@ -29,6 +30,7 @@ func run() error {
 
 	fmt.Println("Server address", config.Addr())
 	fmt.Println("Base URL", config.BaseURL())
+	logger.Initialize(config.LogLevel())
 
 	go startServer(srv)
 	return waitForShutdown(srv)
@@ -70,6 +72,7 @@ func waitForShutdown(srv *http.Server) error {
 func initRouter(h *handler.Handler) http.Handler {
 
 	r := chi.NewRouter()
+	r.Use(logger.RequestLogger)
 	r.Post("/", h.PostHandler)
 	r.Get("/{id}", h.GetHandler)
 	return r

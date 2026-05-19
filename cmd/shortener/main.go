@@ -74,6 +74,7 @@ func initRouter(h *handler.Handler) http.Handler {
 	r := chi.NewRouter()
 	r.Use(logger.RequestLogger)
 	r.Post("/", h.PostHandler)
+	r.Post("/api/shorten", h.APIShortenHandler)
 	r.Get("/{id}", h.GetHandler)
 	return r
 

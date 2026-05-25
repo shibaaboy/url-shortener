@@ -14,6 +14,7 @@ import (
 	"github.com/shibaaboy/url-shortener/internal/config"
 	"github.com/shibaaboy/url-shortener/internal/handler"
 	"github.com/shibaaboy/url-shortener/internal/logger"
+	"github.com/shibaaboy/url-shortener/internal/middleware"
 	"github.com/shibaaboy/url-shortener/internal/storage"
 )
 
@@ -73,6 +74,7 @@ func initRouter(h *handler.Handler) http.Handler {
 
 	r := chi.NewRouter()
 	r.Use(logger.RequestLogger)
+	r.Use(middleware.GzipMiddleware)
 	r.Post("/", h.PostHandler)
 	r.Post("/api/shorten", h.APIShortenHandler)
 	r.Get("/{id}", h.GetHandler)

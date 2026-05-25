@@ -27,14 +27,17 @@ func main() {
 }
 
 func run() error {
-	srv := newApp()
+	store := storage.NewStorage()
+	store.LoadFromFile(config.FileStoragePath())
 
 	fmt.Println("Server address", config.Addr())
 	fmt.Println("Base URL", config.BaseURL())
 	logger.Initialize(config.LogLevel())
 
+	srv := newApp(store)
+
 	go startServer(srv)
-	return waitForShutdown(srv)
+	return waitForShutdown(srv, store)
 }
 
 func startServer(srv *http.Server) {
@@ -43,8 +46,7 @@ func startServer(srv *http.Server) {
 	}
 }
 
-func newApp() *http.Server {
-	store := storage.NewStorage()
+func newApp(store *storage.Storage) *http.Server {
 	h := handler.NewHandler(store)
 	r := initRouter(h)
 
@@ -58,11 +60,13 @@ func newApp() *http.Server {
 	}
 }
 
-func waitForShutdown(srv *http.Server) error {
+func waitForShutdown(srv *http.Server, store *storage.Storage) error {
 	quit := make(chan os.Signal, 1)
 	signal.Notify(quit, os.Interrupt, syscall.SIGTERM)
 
 	<-quit
+
+	store.SaveToFile(config.FileStoragePath())
 
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
@@ -71,13 +75,13 @@ func waitForShutdown(srv *http.Server) error {
 }
 
 func initRouter(h *handler.Handler) http.Handler {
-
 	r := chi.NewRouter()
 	r.Use(logger.RequestLogger)
 	r.Use(middleware.GzipMiddleware)
+
 	r.Post("/", h.PostHandler)
 	r.Post("/api/shorten", h.APIShortenHandler)
 	r.Get("/{id}", h.GetHandler)
-	return r
 
+	return r
 }

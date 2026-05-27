@@ -81,10 +81,10 @@ func (c *compressReader) Read(p []byte) (int, error) {
 }
 
 func (c *compressReader) Close() error {
-	if err := c.r.Close(); err != nil {
+	if err := c.zr.Close(); err != nil {
 		return err
 	}
-	return c.zr.Close()
+	return c.r.Close()
 }
 
 /* ---------- MIDDLEWARE ---------- */

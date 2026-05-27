@@ -54,30 +54,37 @@ func (s *Storage) toFileFormat() []File {
 func (s *Storage) SaveToFile(path string) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
-	file, err := os.OpenFile(path, os.O_CREATE|os.O_WRONLY|os.O_TRUNC, 0666)
 
+	file, err := os.OpenFile(path, os.O_CREATE|os.O_WRONLY|os.O_TRUNC, 0666)
 	if err != nil {
 		return
 	}
-
 	defer file.Close()
-	json.NewEncoder(file).Encode(s.toFileFormat())
 
+	data := s.toFileFormat()
+
+	enc := json.NewEncoder(file)
+	if err := enc.Encode(data); err != nil {
+		return
+	}
 }
 
 func (s *Storage) LoadFromFile(path string) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
-	file, err := os.OpenFile(path, os.O_RDONLY, 0664)
 
+	file, err := os.OpenFile(path, os.O_RDONLY, 0664)
 	if err != nil {
 		return
 	}
-
 	defer file.Close()
 
 	var f []File
-	json.NewDecoder(file).Decode(&f)
+
+	dec := json.NewDecoder(file)
+	if err := dec.Decode(&f); err != nil {
+		return
+	}
 
 	for _, item := range f {
 		s.data[item.ShortURL] = item.OriginalURL

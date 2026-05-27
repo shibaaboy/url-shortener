@@ -10,8 +10,9 @@ import (
 /* ---------- RESPONSE (compress) ---------- */
 
 type compressWriter struct {
-	w  http.ResponseWriter
-	zw *gzip.Writer
+	w          http.ResponseWriter
+	zw         *gzip.Writer
+	compressed bool
 }
 
 func newCompressWriter(w http.ResponseWriter) *compressWriter {
@@ -32,7 +33,9 @@ func (c *compressWriter) Write(b []byte) (int, error) {
 	if strings.Contains(ct, "application/json") ||
 		strings.Contains(ct, "text/html") {
 
+		c.compressed = true
 		c.w.Header().Set("Content-Encoding", "gzip")
+
 		return c.zw.Write(b)
 	}
 
@@ -50,7 +53,11 @@ func (c *compressWriter) WriteHeader(statusCode int) {
 }
 
 func (c *compressWriter) Close() error {
-	return c.zw.Close()
+	if c.compressed {
+		return c.zw.Close()
+	}
+
+	return nil
 }
 
 /* ---------- REQUEST (decompress) ---------- */
